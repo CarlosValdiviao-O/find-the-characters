@@ -4,14 +4,30 @@ import database from './database';
 
 function Game() {
 
-    const [ coords, setCoords ] = useState({top: -100, left: -100})
+    const [ coords, setCoords ] = useState({top: -1000, left: -1000})
     const [ data, setData ] = useState(database);
     const [ random, setRandom ] = useState([]);
+    const [ start, setStart ] = useState(false);
+    const [ clock, setClock ] = useState(new Date(2018, 11, 24, 0, 0, 0, 0));
+    const [ timer, setTimer ] = useState(0);
+    const [ over, setOver ] = useState(false);
 
     useEffect(() => {
         fillRandom();
     }, []);
 
+    useEffect(() => {
+        if (random.length === 0 || coords.top !== -1000) return
+        let over = true;
+        for (let i = 0; i < 3; i ++) {
+            if (random[i].found === false) over = false;
+        }
+        if (over === true) {
+            setTimer(timer => clearInterval(timer));
+            setOver(true);
+        }
+    }, [coords])
+    
     const onClick = (e) => {
         let offset = getOffset(e.target);
         let x = e.pageX - offset.left;
@@ -28,6 +44,7 @@ function Game() {
     }
 
     const fillRandom = () => {
+        if (data.length === 0) return
         let aux = data;
         let randAux = [];
         for (let i = 0; i < 3; i++) {
@@ -49,7 +66,7 @@ function Game() {
                 }
             }
         }
-        setCoords({top: -100, left: -100})
+        setCoords({top: -1000, left: -1000})
         setRandom(aux);
     }
 
@@ -60,26 +77,63 @@ function Game() {
         else return false;
     }
 
+    const startGame = () => {
+        setStart(true);
+        setTimer(setInterval(() => {
+            let newTime = clock;
+            newTime.setSeconds(newTime.getSeconds() + 1);
+            setClock(new Date(newTime));
+        }, 1000))
+    }
+
+    if (start === true)
     
     return (
       <div id='game-container'>
-        <div id='game-ui'></div>
-        <div id="game">
-        <img onClick={onClick} src={Image} alt='simpsons'></img>
-        <div id='modal' style={{top: coords.top - 40, left: coords.left - 40}}>
-            <div id='circle'></div>
-            <div id='picker'>
-                {(random.length > 0) ? random.map ((char) => (char.found === false) ?
-                <button key={char.id} onClick={() => checkFound(char.id)} className='choice'>{char.name}</button> :
-                '') : ''}
+        <div id='game-ui'>
+            <p id='clock'>{clock.toTimeString().substring(0, 9)}</p>
+            <p id='to-home'>Home</p>
+            <div id='to-find'>
+                {(random.length > 0) ? random.map ((char) => 
+                    <div key={char.id} className={(char.found === true) ? 'character found' : 'character'}>
+                        <img src={char.url} alt={char.name}></img>
+                        <p>{char.name}</p>
+                    </div> 
+                    ) : ''}
             </div>
         </div>
-        {(random.length > 0) ? 
-        random.map (char => <div key={char.id} className='found' style={(char.found === true) ? {top:char.yStart, left: char.xStart} : {top: -100, left: -100}}></div>) 
-        : ''}
-      </div>
+        <div id="game">
+            <img onClick={onClick} src={Image} alt='simpsons'></img>
+            <div id='modal' style={{top: coords.top - 40, left: coords.left - 40}}>
+                <div id='circle'></div>
+                <div id='picker'>
+                    {(random.length > 0) ? random.map ((char) => (char.found === false) ?
+                    <button key={char.id} onClick={() => checkFound(char.id)} className='choice'>{char.name}</button> :
+                    '') : ''}
+                </div>
+            </div>
+            {(random.length > 0) ? 
+            random.map (char => <div key={char.id} className='found circle' style={(char.found === true) ? {top:char.yStart, left: char.xStart} : {top: -1000, left: -1000}}></div>) 
+            : ''}
+        </div>
+        {(over === true) ? 
+            <div id='over'>
+                <h3>Your Score:</h3>
+                <h1>{clock.toTimeString().substring(0, 9)}</h1>
+                <div className='buttons'>
+                    <button>Cancel</button>
+                    <button>Submit</button>
+                </div>
+            </div> : ''}
       </div>
     );
+
+    else 
+    return (
+        <div id='preview' style={{backgroundImage: `url(${Image})` }}>
+            <button onClick={startGame}>Ready?</button>
+        </div>
+    )
 }
 
 export default Game;
