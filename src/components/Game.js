@@ -1,20 +1,64 @@
 import { useEffect, useState } from 'react';
 import Image from './simpsons.jpg';
 import database from './database';
+import { getFirestore, collection, getDocs, addDoc } from 'firebase/firestore';
+import { useCollectionData } from 'react-firebase-hooks/firestore';
 
-function Game() {
+function Game(props) {
 
+    const { game, reset } = props;
     const [ coords, setCoords ] = useState({top: -1000, left: -1000})
-    const [ data, setData ] = useState(database);
     const [ random, setRandom ] = useState([]);
     const [ start, setStart ] = useState(false);
     const [ clock, setClock ] = useState(new Date(2018, 11, 24, 0, 0, 0, 0));
     const [ timer, setTimer ] = useState(0);
     const [ over, setOver ] = useState(false);
+    const [ message, setMessage ] = useState('');
+    let data;
+
+    const firestore = getFirestore();
+
+    async function getCollection(db, string) {
+        const dataCol = collection(db, string);
+        const dataSnapshot = await getDocs(dataCol);
+        const dataList = dataSnapshot.docs.map(doc => doc.data());
+        return dataList;
+    }
+
+    async function saveData(x1, x2, name, id, y1, y2, coll) {
+        try {
+        await addDoc(collection(firestore, coll), {
+            name: name,
+            xStart: x1,
+            xEnd: x2,
+            yStart: y1,
+            yEnd: y2,
+            url: '',
+            id: id
+        });
+        }
+        catch(error) {
+        console.error('Error writing new message to Firebase Database', error);
+        }
+    }
+
+    //database.forEach((item) => {
+    //  saveData(item.xStart, item.xEnd, item.name, item.id, item.yStart, item.yEnd, 'maps/map1/characters')
+    //})
 
     useEffect(() => {
-        fillRandom();
+        data = getCollection(firestore, `maps/map${game}/characters`);
     }, []);
+
+    useEffect(() => {
+        if (data.length === 0 ) return;
+        if (data.length === undefined) {
+            Promise.resolve(data).then((val) =>{
+                data = val;
+                fillRandom();
+            })
+        }  
+    }, [data])
 
     useEffect(() => {
         if (random.length === 0 || coords.top !== -1000) return
@@ -44,7 +88,7 @@ function Game() {
     }
 
     const fillRandom = () => {
-        if (data.length === 0) return
+        console.log(data);
         let aux = data;
         let randAux = [];
         for (let i = 0; i < 3; i++) {
@@ -62,7 +106,17 @@ function Game() {
             if (aux[i].id === id) {
                 let result = isBetweenBoundaries(aux[i])
                 aux[i].found = result;
-                if (result === true) {//message logic
+                if (result === true) {
+                    setMessage(`You found ${aux[i].name}!`);
+                    setTimeout(() => {
+                        setMessage('');
+                    }, 3000)
+                }
+                else {
+                    setMessage(`That's not ${aux[i].name}!`);
+                    setTimeout(() => {
+                        setMessage('');
+                    }, 3000)
                 }
             }
         }
@@ -124,7 +178,13 @@ function Game() {
                     <button>Cancel</button>
                     <button>Submit</button>
                 </div>
-            </div> : ''}
+            </div> 
+        : ''}
+        {(message !== '') ? 
+            <div id='message'>
+                <p>{message}</p>
+            </div>
+        : ''}
       </div>
     );
 
