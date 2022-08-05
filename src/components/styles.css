@@ -12,6 +12,11 @@
     position: relative;
 }
 
+#game img {
+    width: 100%;
+    min-width: 800px;
+}
+
 #game-ui .found {
     color: gray;
 }

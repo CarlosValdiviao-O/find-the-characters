@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import Image from './simpsons.jpg';
 import database from './database';
-import { getFirestore, collection, getDocs, addDoc } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, addDoc, doc } from 'firebase/firestore';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
 
 function Game(props) {
@@ -13,7 +13,9 @@ function Game(props) {
     const [ clock, setClock ] = useState(new Date(2018, 11, 24, 0, 0, 0, 0));
     const [ timer, setTimer ] = useState(0);
     const [ over, setOver ] = useState(false);
-    const [ message, setMessage ] = useState('');
+    const [ message, setMessage ] = useState(''); 
+    const [ ogSize, setOgSize ] = useState({}); 
+    const [ size, setSize ] = useState({});
     let data;
 
     const firestore = getFirestore();
@@ -47,7 +49,7 @@ function Game(props) {
     //})
 
     useEffect(() => {
-        data = getCollection(firestore, `maps/map${game}/characters`);
+        data = getCollection(firestore, `maps/map${game}/characters`);     
     }, []);
 
     useEffect(() => {
@@ -58,7 +60,35 @@ function Game(props) {
                 fillRandom();
             })
         }  
-    }, [data])
+    }, [data]);
+
+    useEffect(() => {
+        if (document.getElementById('game-img')) {
+            let img = document.getElementById('game-img');
+            console.log(ogSize)
+            if (ogSize.width === undefined) {
+                setOgSize({
+                    width: img.naturalWidth,
+                    height: img.naturalHeight
+                })
+                handleResize();
+            }
+        } 
+        function handleResize() {
+            if (document.getElementById('game-img')) {
+                const img = document.getElementById('game-img');
+                const elemRect = img.getBoundingClientRect();
+                setSize({
+                    width: elemRect.width,
+                    height: elemRect.height,
+                    circle: (80 * elemRect.width) / 1920,
+                });
+                setCoords({top: -1000, left: -1000})
+            }    
+        }
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, [coords]);
 
     useEffect(() => {
         if (random.length === 0 || coords.top !== -1000) return
@@ -82,13 +112,12 @@ function Game(props) {
     const getOffset = (target) =>{
         let bodyRect = document.body.getBoundingClientRect();
         let elemRect = target.getBoundingClientRect();
-        let top   = elemRect.top - bodyRect.top;
+        let top = elemRect.top - bodyRect.top;
         let left = elemRect.left - bodyRect.left;
         return {top: top, left: left}
     }
 
     const fillRandom = () => {
-        console.log(data);
         let aux = data;
         let randAux = [];
         for (let i = 0; i < 3; i++) {
@@ -125,8 +154,12 @@ function Game(props) {
     }
 
     const isBetweenBoundaries = (char) => {
-        if (char.xStart <= coords.left && char.xEnd >= coords.left &&
-            char.yStart <= coords.top && char.yEnd >= coords.top)
+        let left = (char.xStart * size.width) / ogSize.width;
+        let right = (char.xEnd * size.width) / ogSize.width;
+        let top = (char.yStart * size.height) / ogSize.height;
+        let bottom = (char.yEnd * size.height) / ogSize.height;
+        if (left <= coords.left && right >= coords.left &&
+            top <= coords.top && bottom >= coords.top)
         return true;
         else return false;
     }
@@ -157,9 +190,9 @@ function Game(props) {
             </div>
         </div>
         <div id="game">
-            <img onClick={onClick} src={Image} alt='simpsons'></img>
-            <div id='modal' style={{top: coords.top - 40, left: coords.left - 40}}>
-                <div id='circle'></div>
+            <img onClick={onClick} src={Image} alt='simpsons' id='game-img'></img>
+            <div id='modal' style={{top: coords.top - (size.circle / 2), left: coords.left - (size.circle / 2)}}>
+                <div id='circle' style={{width: size.circle, height: size.circle}}></div>
                 <div id='picker'>
                     {(random.length > 0) ? random.map ((char) => (char.found === false) ?
                     <button key={char.id} onClick={() => checkFound(char.id)} className='choice'>{char.name}</button> :
@@ -167,7 +200,9 @@ function Game(props) {
                 </div>
             </div>
             {(random.length > 0) ? 
-            random.map (char => <div key={char.id} className='found circle' style={(char.found === true) ? {top:char.yStart, left: char.xStart} : {top: -1000, left: -1000}}></div>) 
+            random.map (char => <div key={char.id} className='found circle' style={(char.found === true) ?
+                 {left:(char.xStart * size.width) / ogSize.width, top: (char.yStart * size.height) / ogSize.height,
+                    width: size.circle, height: size.circle} : {top: -1000, left: -1000}}></div>) 
             : ''}
         </div>
         {(over === true) ? 
@@ -190,15 +225,10 @@ function Game(props) {
 
     else 
     return (
-        <div id='preview' style={{backgroundImage: `url(${Image})` }}>
+        <div id='preview' style={{backgroundImage: `url(${Image})`}}>
             <button onClick={startGame}>Ready?</button>
         </div>
     )
 }
 
 export default Game;
-
-
-  
-
-
