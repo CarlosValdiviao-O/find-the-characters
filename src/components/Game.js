@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
-import Image from './simpsons.jpg';
 import database from './database';
-import { getFirestore, collection, getDocs, addDoc, doc } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, addDoc, doc, serverTimestamp,
+         query, orderBy, limit, onSnapshot, } from 'firebase/firestore';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
+import uniqid from 'uniqid';
 
 function Game(props) {
 
-    const { game, reset } = props;
+    const { game, reset, loadLeaderboard } = props;
     const [ coords, setCoords ] = useState({top: -1000, left: -1000})
     const [ random, setRandom ] = useState([]);
     const [ start, setStart ] = useState(false);
@@ -16,6 +17,10 @@ function Game(props) {
     const [ message, setMessage ] = useState(''); 
     const [ ogSize, setOgSize ] = useState({}); 
     const [ size, setSize ] = useState({});
+    const [ player, setPlayer ] = useState('Anonymous');
+    const [ leaderboard, setLeaderboard ] = useState([]);
+    const [ submitted, setSubmitted ] = useState(false);
+    const [ displayLB, setDisplayLB ] = useState(true);
     let data;
 
     const firestore = getFirestore();
@@ -40,10 +45,23 @@ function Game(props) {
         });
         }
         catch(error) {
-        console.error('Error writing new message to Firebase Database', error);
+            console.error('Error writing new message to Firebase Database', error);
         }
     }
 
+    const saveScore = async (data, coll) => {
+        try {
+            await addDoc(collection(firestore, coll), {
+                score: data,
+                timestamp: serverTimestamp(),
+                name: player,
+                id: uniqid(),
+            });
+        }
+        catch (error) {
+            console.error('Error writing new message to Firebase Database', error);
+        }
+    }
     //database.forEach((item) => {
     //  saveData(item.xStart, item.xEnd, item.name, item.id, item.yStart, item.yEnd, 'maps/map1/characters')
     //})
@@ -58,14 +76,14 @@ function Game(props) {
             Promise.resolve(data).then((val) =>{
                 data = val;
                 fillRandom();
-            })
+            });
+            setLeaderboard(loadLeaderboard(`maps/map${game}/leaderboard`));            
         }  
     }, [data]);
 
     useEffect(() => {
         if (document.getElementById('game-img')) {
             let img = document.getElementById('game-img');
-            console.log(ogSize)
             if (ogSize.width === undefined) {
                 setOgSize({
                     width: img.naturalWidth,
@@ -170,7 +188,20 @@ function Game(props) {
             let newTime = clock;
             newTime.setSeconds(newTime.getSeconds() + 1);
             setClock(new Date(newTime));
-        }, 1000))
+        }, 1000));
+        setCoords({top: -1000, left: -1000})
+    }
+
+    const onSubmit = () => {
+        setDisplayLB(false);
+        saveScore(clock, `maps/map${game}/leaderboard`);
+        setLeaderboard([]);
+        let aux = loadLeaderboard(`maps/map${game}/leaderboard`);       
+        setLeaderboard(aux);        
+        setSubmitted(true);
+        setTimeout(() => {
+            setDisplayLB(true);
+        }, 300)  
     }
 
     if (start === true)
@@ -190,7 +221,7 @@ function Game(props) {
             </div>
         </div>
         <div id="game">
-            <img onClick={onClick} src={Image} alt='simpsons' id='game-img'></img>
+            <img onClick={onClick} src={`${process.env.PUBLIC_URL}/assets/images/map${game}.jpg`} alt='simpsons' id='game-img'></img>
             <div id='modal' style={{top: coords.top - (size.circle / 2), left: coords.left - (size.circle / 2)}}>
                 <div id='circle' style={{width: size.circle, height: size.circle}}></div>
                 <div id='picker'>
@@ -209,10 +240,23 @@ function Game(props) {
             <div id='over'>
                 <h3>Your Score:</h3>
                 <h1>{clock.toTimeString().substring(0, 9)}</h1>
-                <div className='buttons'>
-                    <button>Cancel</button>
-                    <button>Submit</button>
+                <div id='leaderboard'> 
+                    {(displayLB === true) ? leaderboard.map ((score) => {
+                        return(<div className='score' key={score.id}>
+                                    <p>{score.name}</p>
+                                    <p>{score.score.toDate().toTimeString().substring(0, 9)}</p>
+                                </div>)
+                    }) : ''}
                 </div>
+                {((leaderboard.length < 10  || leaderboard[9].score.toDate() > clock) && submitted === false) ? 
+                    <div id='form'>
+                        <p>You got a new highscore!</p>
+                        <input onChange={(e) => setPlayer(e.target.value)} maxLength='12'></input>
+                        <button onClick={onSubmit}>Submit</button>
+                    </div> : ''}
+                                    
+                <button onClick={reset}>Continue</button>
+                
             </div> 
         : ''}
         {(message !== '') ? 
@@ -225,7 +269,7 @@ function Game(props) {
 
     else 
     return (
-        <div id='preview' style={{backgroundImage: `url(${Image})`}}>
+        <div id='preview' style={{backgroundImage: `url(${process.env.PUBLIC_URL}/assets/images/map${game}.jpg)`}}>
             <button onClick={startGame}>Ready?</button>
         </div>
     )
