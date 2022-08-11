@@ -21,6 +21,7 @@ function App() {
   const [ game, setGame ] = useState(0);
   const [ leaderboard, setLeaderboard ] = useState(0);
   const [ leaderboardList, setLeaderboardList ] = useState([]);
+  const games = [1, 2, 3];
 
   const pickGame = (num) => {
     setGame(num);
@@ -49,8 +50,12 @@ function App() {
     <div className="App">
       {(game === 0) ? 
         <div id="game-selection">
-          <button onClick={() => pickGame(1)}>lvl1</button>
-          <button onClick={() => showLeaderboard(1)}>Leaderboard</button>
+          {games.map((num) => 
+            <div key={num} className='level-container'>
+              <button onClick={() => pickGame(num)}>{'Level ' + num}</button>
+              <button onClick={() => showLeaderboard(num)}>Leaderboard</button>
+            </div>
+          )}
           {(leaderboard > 0) ? 
             <div id='leaderboard'> 
               { (leaderboardList.length > 0) ? leaderboardList.map ((score) => {

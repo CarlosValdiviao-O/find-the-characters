@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import database from './database';
 import { getFirestore, collection, getDocs, addDoc, doc, serverTimestamp,
          query, orderBy, limit, onSnapshot, } from 'firebase/firestore';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
 import uniqid from 'uniqid';
+import database from './database';
 
 function Game(props) {
 
@@ -22,6 +22,10 @@ function Game(props) {
     const [ submitted, setSubmitted ] = useState(false);
     const [ displayLB, setDisplayLB ] = useState(true);
     let data;
+    //const [ database, setDatabase ] = useState([]);
+    //const [ name, setName ] = useState('');
+    //const [ id, setId ] = useState('');
+    //const chars = database;
 
     const firestore = getFirestore();
 
@@ -32,22 +36,22 @@ function Game(props) {
         return dataList;
     }
 
-    async function saveData(x1, x2, name, id, y1, y2, coll) {
-        try {
-        await addDoc(collection(firestore, coll), {
-            name: name,
-            xStart: x1,
-            xEnd: x2,
-            yStart: y1,
-            yEnd: y2,
-            url: '',
-            id: id
-        });
-        }
-        catch(error) {
-            console.error('Error writing new message to Firebase Database', error);
-        }
-    }
+    //async function saveData(x1, x2, name, id, y1, y2, coll) {
+    //    try {
+    //    await addDoc(collection(firestore, coll), {
+    //        name: name,
+    //        xStart: x1,
+    //        xEnd: x2,
+    //        yStart: y1,
+    //        yEnd: y2,
+    //        url: '',
+    //        id: id
+    //    });
+    //    }
+    //    catch(error) {
+    //        console.error('Error writing new message to Firebase Database', error);
+    //    }
+    //}
 
     const saveScore = async (data, coll) => {
         try {
@@ -62,12 +66,17 @@ function Game(props) {
             console.error('Error writing new message to Firebase Database', error);
         }
     }
-    //database.forEach((item) => {
-    //  saveData(item.xStart, item.xEnd, item.name, item.id, item.yStart, item.yEnd, 'maps/map1/characters')
-    //})
 
     useEffect(() => {
-        data = getCollection(firestore, `maps/map${game}/characters`);     
+        data = getCollection(firestore, `maps/map${game}/characters`);    
+        //if (id === '') {
+        //    setId('1');
+        //    setTimeout(() => {
+        //        chars.forEach((item) => {
+        //            saveData(item.xStart, item.xEnd, item.name, item.id, item.yStart, item.yEnd, 'maps/map3/characters')
+        //        })
+        //    }, 2000) ;           
+        //} 
     }, []);
 
     useEffect(() => {
@@ -127,6 +136,18 @@ function Game(props) {
         setCoords({top: y, left: x});
     }
 
+    //const pushChar = () => {
+    //    setDatabase(database.concat({
+    //        xStart: coords.left - (size.circle / 2),
+    //        yStart: coords.top - (size.circle / 2),
+    //        xEnd: coords.left + (size.circle / 2),
+    //        yEnd: coords.top + (size.circle / 2),
+    //        name: name,
+    //        id: id
+    //    }))
+    //    console.log(database);
+    //}
+
     const getOffset = (target) =>{
         let bodyRect = document.body.getBoundingClientRect();
         let elemRect = target.getBoundingClientRect();
@@ -151,7 +172,7 @@ function Game(props) {
         let aux = random;
         for (let i = 0; i < 3; i ++) {
             if (aux[i].id === id) {
-                let result = isBetweenBoundaries(aux[i])
+                let result = isBetweenBoundaries(aux[i]);
                 aux[i].found = result;
                 if (result === true) {
                     setMessage(`You found ${aux[i].name}!`);
@@ -221,13 +242,14 @@ function Game(props) {
             </div>
         </div>
         <div id="game">
-            <img onClick={onClick} src={`${process.env.PUBLIC_URL}/assets/images/map${game}.jpg`} alt='simpsons' id='game-img'></img>
+            <img onClick={onClick} src={`${process.env.PUBLIC_URL}/assets/images/map${game}.jpg`} alt={`map ${game}`} id='game-img'></img>
             <div id='modal' style={{top: coords.top - (size.circle / 2), left: coords.left - (size.circle / 2)}}>
                 <div id='circle' style={{width: size.circle, height: size.circle}}></div>
                 <div id='picker'>
                     {(random.length > 0) ? random.map ((char) => (char.found === false) ?
                     <button key={char.id} onClick={() => checkFound(char.id)} className='choice'>{char.name}</button> :
                     '') : ''}
+
                 </div>
             </div>
             {(random.length > 0) ? 
@@ -276,3 +298,9 @@ function Game(props) {
 }
 
 export default Game;
+
+//For adding more maps
+
+//<input onChange={(e) => setName(e.target.value)}></input>
+//<input onChange={(e) => setId(e.target.value)}></input>
+//<button onClick={pushChar}>click</button>
