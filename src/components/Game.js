@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react';
-import { getFirestore, collection, getDocs, addDoc, doc, serverTimestamp,
-         query, orderBy, limit, onSnapshot, } from 'firebase/firestore';
-import { useCollectionData } from 'react-firebase-hooks/firestore';
+import { getFirestore, collection, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 import uniqid from 'uniqid';
-import database from './database';
+//import database from './database';
 
 function Game(props) {
 
@@ -21,6 +19,7 @@ function Game(props) {
     const [ leaderboard, setLeaderboard ] = useState([]);
     const [ submitted, setSubmitted ] = useState(false);
     const [ displayLB, setDisplayLB ] = useState(true);
+    const [ pickerCoo, setPickerCoo ] = useState({top: -1000, left: -1000});
     let data;
     //const [ database, setDatabase ] = useState([]);
     //const [ name, setName ] = useState('');
@@ -110,7 +109,8 @@ function Game(props) {
                     height: elemRect.height,
                     circle: (80 * elemRect.width) / 1920,
                 });
-                setCoords({top: -1000, left: -1000})
+                setCoords({top: -1000, left: -1000});
+                setPickerCoo({top: -1000, left: -1000});
             }    
         }
         window.addEventListener("resize", handleResize);
@@ -120,7 +120,7 @@ function Game(props) {
     useEffect(() => {
         if (random.length === 0 || coords.top !== -1000) return
         let over = true;
-        for (let i = 0; i < 3; i ++) {
+        for (let i = 0; i < game + 2; i ++) {
             if (random[i].found === false) over = false;
         }
         if (over === true) {
@@ -133,6 +133,14 @@ function Game(props) {
         let offset = getOffset(e.target);
         let x = e.pageX - offset.left;
         let y = e.pageY - offset.top;
+        if (x < size.width / 2) setPickerCoo({
+                top: y - (size.circle / 2),
+                left: x + (size.circle / 2) + 10
+            });
+        else setPickerCoo({
+                top: y - (size.circle / 2),
+                left: x - (size.circle / 2) - 10 - (size.circle * 3)
+            });
         setCoords({top: y, left: x});
     }
 
@@ -159,7 +167,7 @@ function Game(props) {
     const fillRandom = () => {
         let aux = data;
         let randAux = [];
-        for (let i = 0; i < 3; i++) {
+        for (let i = 0; i < game + 2; i++) {
             let num = Math.floor(Math.random() * aux.length);
             randAux[i] = aux[num];
             randAux[i].found = false;
@@ -170,7 +178,7 @@ function Game(props) {
 
     const checkFound = (id) => {
         let aux = random;
-        for (let i = 0; i < 3; i ++) {
+        for (let i = 0; i < game + 2; i ++) {
             if (aux[i].id === id) {
                 let result = isBetweenBoundaries(aux[i]);
                 aux[i].found = result;
@@ -188,7 +196,8 @@ function Game(props) {
                 }
             }
         }
-        setCoords({top: -1000, left: -1000})
+        setCoords({top: -1000, left: -1000});
+        setPickerCoo({top: -1000, left: -1000});
         setRandom(aux);
     }
 
@@ -230,8 +239,8 @@ function Game(props) {
     return (
       <div id='game-container'>
         <div id='game-ui'>
+            <p id='to-home' onClick={reset}>Home</p>
             <p id='clock'>{clock.toTimeString().substring(0, 9)}</p>
-            <p id='to-home'>Home</p>
             <div id='to-find'>
                 {(random.length > 0) ? random.map ((char) => 
                     <div key={char.id} className={(char.found === true) ? 'character found' : 'character'}>
@@ -243,15 +252,14 @@ function Game(props) {
         </div>
         <div id="game">
             <img onClick={onClick} src={`${process.env.PUBLIC_URL}/assets/images/map${game}.jpg`} alt={`map ${game}`} id='game-img'></img>
-            <div id='modal' style={{top: coords.top - (size.circle / 2), left: coords.left - (size.circle / 2)}}>
-                <div id='circle' style={{width: size.circle, height: size.circle}}></div>
-                <div id='picker'>
-                    {(random.length > 0) ? random.map ((char) => (char.found === false) ?
-                    <button key={char.id} onClick={() => checkFound(char.id)} className='choice'>{char.name}</button> :
-                    '') : ''}
-
-                </div>
-            </div>
+            <div id='circle' style={{width: size.circle, height: size.circle,
+                                    top: coords.top - (size.circle / 2), 
+                                    left: coords.left - (size.circle / 2),}}></div>
+            <div id='picker' style={{top: pickerCoo.top, left: pickerCoo.left, width: size.circle * 3}}>
+                {(random.length > 0) ? random.map ((char) => (char.found === false) ?
+                <button key={char.id} onClick={() => checkFound(char.id)} className='choice'>{char.name}</button> :
+                '') : ''}
+            </div>          
             {(random.length > 0) ? 
             random.map (char => <div key={char.id} className='found circle' style={(char.found === true) ?
                  {left:(char.xStart * size.width) / ogSize.width, top: (char.yStart * size.height) / ogSize.height,
@@ -260,15 +268,22 @@ function Game(props) {
         </div>
         {(over === true) ? 
             <div id='over'>
-                <h3>Your Score:</h3>
-                <h1>{clock.toTimeString().substring(0, 9)}</h1>
                 <div id='leaderboard'> 
-                    {(displayLB === true) ? leaderboard.map ((score) => {
-                        return(<div className='score' key={score.id}>
-                                    <p>{score.name}</p>
-                                    <p>{score.score.toDate().toTimeString().substring(0, 9)}</p>
-                                </div>)
-                    }) : ''}
+                    <h3>Leaderboard</h3>
+                    {(displayLB === true) ?
+                        <div id="scores">
+                            {leaderboard.map ((score) => {
+                            return(<div className='score' key={score.id}>
+                                        <p>{score.name}</p>
+                                        <p>{score.score.toDate().toTimeString().substring(0, 9)}</p>
+                                    </div>)
+                            })}
+                        </div>
+                    : ''}
+                </div>
+                <div id='player-score'>
+                    <h3>Your Score:</h3>
+                    <h1>{clock.toTimeString().substring(0, 9)}</h1>       
                 </div>
                 {((leaderboard.length < 10  || leaderboard[9].score.toDate() > clock) && submitted === false) ? 
                     <div id='form'>
@@ -277,8 +292,7 @@ function Game(props) {
                         <button onClick={onSubmit}>Submit</button>
                     </div> : ''}
                                     
-                <button onClick={reset}>Continue</button>
-                
+                <button onClick={reset}>Continue</button>              
             </div> 
         : ''}
         {(message !== '') ? 

@@ -1,11 +1,129 @@
 * {
     margin: 0;
     padding: 0;
+    border: 0;
     box-sizing: border-box;
 }
 
-#root {
+body {
+    position: relative;
+}
+
+button:not(.level), input {
+    font-size: 1rem;
+    padding: 8px;
+    border-radius: 4px;
+}
+
+button:hover {
+    cursor: pointer;
+}
+
+header {
+    padding-bottom: 10px;
+    display: flex;
+    justify-content: center;
+    background-color: green;
+}
+
+#levels {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, 26rem);
+    grid-auto-rows: 20rem;
+    gap: 10px;
+    padding: 1rem;
+    justify-content: center;
+    align-items: center;
+}
+
+.level-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    border: 1px solid black;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.level {
+    width: 100%;
+    height: 95%;
+    background-size: cover;
+    background-position: center;
+}
+
+.level-container .bottom {
+    padding: 6px;
+    display: flex;
+    justify-content: start;
+    gap: 10px;
+    align-items: center;
+}
+
+#game-selection>#leaderboard, #over {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    padding: 20px;
+    transform: translate(-50%, -50%);
+    background-color: red;
+    border-radius: 10px;
+    width: 70vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+#over #leaderboard {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#leaderboard h3, #leaderboard .buttons {
+    width: 100%;
+    text-align: center;
     padding: 10px;
+}
+
+#scores {
+    max-height: 35vh;
+    overflow-y: auto;
+    width: 95%;
+    display: flex;
+    flex-direction: column;
+    background-color: grey;
+    border-radius: 8px;
+}
+
+.score {
+    padding: 8px;
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+}
+
+#player-score {
+    padding: 8px;
+    border: 1px solid beige;
+    border-radius: 6px;
+}
+
+input {
+    margin-right: 8px;
+}
+
+#over>button {
+    align-self: flex-end;
+}
+
+#leaderboard .buttons {
+    display: flex;
+    justify-content: end;
+    gap: 8px;
 }
 
 #game {
@@ -17,17 +135,50 @@
     min-width: 800px;
 }
 
+#game-ui {
+    display: flex;
+    width: 100%;
+    height: 3rem;
+    justify-content: space-around;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: white;
+}
+
+#to-home:hover {
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+#to-find {
+    display: flex;
+    width: 60%;
+    height: 100%;
+}
+
+.character {
+    display: flex;
+    width: 30%;
+    align-items: center;
+    gap: 2px;
+}
+
+.character img {
+    max-height: 100%;
+}
+
 #game-ui .found {
     color: gray;
 }
 
-#modal {
-    position: absolute;
-    display: flex;
-    gap: 10px;
+#game-ui .found img {
+    filter: sepia();
 }
 
 #circle {
+    position: absolute;
     width: 80px;
     height: 80px;
     border-radius: 50%;
@@ -36,7 +187,11 @@
 }
 
 #picker {
+    position: absolute;
     background-color: gray;
+    display: flex;
+    flex-direction: column;
+    transform: translateY(-25%);
 }
 
 .circle.found {
@@ -60,4 +215,20 @@
     align-items: center;
     background-size: cover;
     box-shadow: inset 100vw 100vh rgba(82, 82, 82, 0.9);
+}
+
+#message {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-25%);
+    background-color: gray;
+    width: fit-content;
+    border-radius: 6px;
+    z-index: 1;
+}
+
+#message p {
+    padding: 6px 12px;
+    font-size: 1.2rem;
 }

@@ -1,7 +1,6 @@
 import Game from "./components/Game";
 import './components/styles.css';
 import { initializeApp } from "firebase/app";
-import database from './components/database';
 import { useState } from "react";
 import { query, orderBy, limit, onSnapshot, collection, getFirestore } from 'firebase/firestore'
 
@@ -50,23 +49,38 @@ function App() {
     <div className="App">
       {(game === 0) ? 
         <div id="game-selection">
-          {games.map((num) => 
-            <div key={num} className='level-container'>
-              <button onClick={() => pickGame(num)}>{'Level ' + num}</button>
-              <button onClick={() => showLeaderboard(num)}>Leaderboard</button>
-            </div>
-          )}
+          <header>
+            <h1>Find the Characters</h1>
+          </header>
+          <div id="levels">
+            {games.map((num) => 
+              <div key={num} className='level-container'>
+                <button className="level"  onClick={() => pickGame(num)} 
+                    style={{backgroundImage: `url(${process.env.PUBLIC_URL}/assets/images/map${num}.jpg)`}}></button>
+                <div className="bottom">
+                  <p>{'Level ' + num}</p>
+                  <button onClick={() => showLeaderboard(num)}>Leaderboard</button>
+                </div>
+              </div>
+            )}
+          </div>
           {(leaderboard > 0) ? 
             <div id='leaderboard'> 
-              { (leaderboardList.length > 0) ? leaderboardList.map ((score) => {
-                return(<div className='score' key={score.id}>
-                            <p>{score.name}</p>
-                            <p>{score.score.toDate().toTimeString().substring(0, 9)}</p>
-                        </div>)
-                })
+              <h3>Leaderboard</h3>
+              { (leaderboardList.length > 0) ? 
+                <div id="scores">
+                  {leaderboardList.map ((score) => {
+                    return(<div className='score' key={score.id}>
+                                <p>{score.name}</p>
+                                <p>{score.score.toDate().toTimeString().substring(0, 9)}</p>
+                            </div>)
+                    })}
+                </div>
               : '' }
-              <button onClick={() => setLeaderboard(0)}>Go back</button>
-              <button onClick={() => setGame(leaderboard)}>Play this Level</button>
+              <div className="buttons">
+                <button onClick={() => setLeaderboard(0)}>Go back</button>
+                <button onClick={() => setGame(leaderboard)}>Play this Level</button>
+              </div>
            </div>
           : ''}
         </div>
