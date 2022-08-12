@@ -1,3 +1,8 @@
+:root {
+    --white: rgb(255, 255, 255);
+    --red: rgb(250, 12, 12);
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -7,23 +12,30 @@
 
 body {
     position: relative;
+    min-height: 100vh;
+    border: 5px solid var(--red);
+    min-width: 810px;
 }
 
 button:not(.level), input {
     font-size: 1rem;
     padding: 8px;
     border-radius: 4px;
+    background-color: var(--red);
+    color: var(--white);
 }
 
 button:hover {
     cursor: pointer;
+    background-color: rgb(250 12 12 / 80%);
 }
 
 header {
-    padding-bottom: 10px;
+    padding: 10px 0 ;
     display: flex;
     justify-content: center;
-    background-color: green;
+    background-color: var(--red);
+    color: var(--white);
 }
 
 #levels {
@@ -61,42 +73,55 @@ header {
     align-items: center;
 }
 
-#game-selection>#leaderboard, #over {
+#game-selection>.leaderboard, #over {
     position: fixed;
     top: 50%;
     left: 50%;
     padding: 20px;
     transform: translate(-50%, -50%);
-    background-color: red;
+    background-color: var(--red);
     border-radius: 10px;
     width: 70vw;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 5px;
 }
 
-#over #leaderboard {
+.leaderboard>*:not(:first-child), #over>*:not(:first-child):not(button){
+    background-color: var(--white);
+}
+
+#over input {
+    background-color: var(--white);
+    border: 2px solid  var(--red);
+}
+
+#over>*{
     width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-#leaderboard h3, #leaderboard .buttons {
+.leaderboard h3, .leaderboard .buttons {
     width: 100%;
     text-align: center;
     padding: 10px;
+    color: var(--white);
+    font-size: 1.5rem;
 }
 
 #scores {
     max-height: 35vh;
     overflow-y: auto;
-    width: 95%;
+    width: 100%;
     display: flex;
     flex-direction: column;
-    background-color: grey;
-    border-radius: 8px;
+    border-radius: 8px 8px 0 0;
+}
+
+.buttons {
+    border-radius: 0 0 8px 8px;
 }
 
 .score {
@@ -106,21 +131,36 @@ header {
     justify-content: space-around;
 }
 
+.score p:first-of-type {
+    font-weight: bold;
+}
+
+.score p:last-of-type {
+    font-style: italic;
+}
+
 #player-score {
     padding: 8px;
-    border: 1px solid beige;
+    border: 2px solid var(--red);
     border-radius: 6px;
+    margin-bottom: 8px;
 }
 
 input {
     margin-right: 8px;
 }
 
-#over>button {
-    align-self: flex-end;
+#form>p {
+    font-size: 1.2rem;
+    font-weight: bold;
 }
 
-#leaderboard .buttons {
+#over .buttons button {
+    align-self: flex-end;
+    margin: 6px;
+}
+
+.leaderboard .buttons {
     display: flex;
     justify-content: end;
     gap: 8px;
@@ -144,7 +184,9 @@ input {
     position: sticky;
     top: 0;
     z-index: 1;
-    background-color: white;
+    background-color: var(--red);
+    color: var(--white);
+    font-weight: bold;
 }
 
 #to-home:hover {
@@ -170,7 +212,7 @@ input {
 }
 
 #game-ui .found {
-    color: gray;
+    color: rgb(255 255 255 / 60%);
 }
 
 #game-ui .found img {
@@ -222,7 +264,8 @@ input {
     bottom: 0;
     left: 50%;
     transform: translateX(-25%);
-    background-color: gray;
+    background-color: var(--red);
+    color: var(--white);
     width: fit-content;
     border-radius: 6px;
     z-index: 1;

@@ -268,7 +268,7 @@ function Game(props) {
         </div>
         {(over === true) ? 
             <div id='over'>
-                <div id='leaderboard'> 
+                <div className='leaderboard'> 
                     <h3>Leaderboard</h3>
                     {(displayLB === true) ?
                         <div id="scores">
@@ -281,18 +281,24 @@ function Game(props) {
                         </div>
                     : ''}
                 </div>
-                <div id='player-score'>
-                    <h3>Your Score:</h3>
-                    <h1>{clock.toTimeString().substring(0, 9)}</h1>       
+                <div id='score-container'>
+                    <div id='player-score'>
+                        <h3>Your Score:</h3>
+                        <h1>{clock.toTimeString().substring(0, 9)}</h1>       
+                    </div> 
                 </div>
                 {((leaderboard.length < 10  || leaderboard[9].score.toDate() > clock) && submitted === false) ? 
                     <div id='form'>
                         <p>You got a new highscore!</p>
-                        <input onChange={(e) => setPlayer(e.target.value)} maxLength='12'></input>
-                        <button onClick={onSubmit}>Submit</button>
+                        <div>
+                            <input onChange={(e) => setPlayer(e.target.value)} maxLength='12'></input>
+                            <button onClick={onSubmit}>Submit</button>
+                        </div>
                     </div> : ''}
                                     
-                <button onClick={reset}>Continue</button>              
+                <div className='buttons'>
+                    <button onClick={reset}>Continue</button>  
+                </div>            
             </div> 
         : ''}
         {(message !== '') ? 

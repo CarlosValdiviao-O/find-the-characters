@@ -65,7 +65,7 @@ function App() {
             )}
           </div>
           {(leaderboard > 0) ? 
-            <div id='leaderboard'> 
+            <div className='leaderboard'> 
               <h3>Leaderboard</h3>
               { (leaderboardList.length > 0) ? 
                 <div id="scores">
