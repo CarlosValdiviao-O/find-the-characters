@@ -94,6 +94,7 @@ header {
 #over input {
     background-color: var(--white);
     border: 2px solid  var(--red);
+    color: black;
 }
 
 #over>*{

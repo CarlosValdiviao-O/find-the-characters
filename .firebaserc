@@ -1,5 +1,7 @@
 {
   "projects": {
     "default": "find-the-characters-odin"
-  }
+  },
+  "targets": {},
+  "etags": {}
 }
