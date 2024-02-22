@@ -68,7 +68,7 @@ header {
 .level-container .bottom {
     padding: 6px;
     display: flex;
-    justify-content: start;
+    justify-content: flex-start;
     gap: 10px;
     align-items: center;
 }
@@ -168,7 +168,7 @@ input {
 
 .leaderboard .buttons {
     display: flex;
-    justify-content: end;
+    justify-content: flex-end;
     gap: 8px;
 }
 
