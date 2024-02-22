@@ -32,17 +32,15 @@ function App() {
     onSnapshot(recentMessagesQuery, function(snapshot) {
         snapshot.docChanges().forEach(function(change) {
             aux.push(change.doc.data());
-        });
+        });       
+      setLeaderboardList(state => [...aux]); 
     });
     return aux;
   }
 
   const showLeaderboard = (num) => {
-    let aux = loadLeaderboard(`maps/map${num}/leaderboard`);
-    setLeaderboardList(aux);
-    setTimeout(() => {
-      setLeaderboard(num);
-    }, 1200)
+    loadLeaderboard(`maps/map${num}/leaderboard`);
+    setLeaderboard(num);
   }
 
   return (
@@ -76,9 +74,14 @@ function App() {
                             </div>)
                     })}
                 </div>
-              : '' }
+              : 
+                <div className="score">
+                  <p>Loading</p>
+                  <p>...</p>
+                </div>
+              }
               <div className="buttons">
-                <button onClick={() => setLeaderboard(0)}>Go back</button>
+                <button onClick={() => {setLeaderboard(0) ; setLeaderboardList([])}}>Go back</button>
                 <button onClick={() => setGame(leaderboard)}>Play this Level</button>
               </div>
            </div>

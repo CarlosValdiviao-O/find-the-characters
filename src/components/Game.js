@@ -272,12 +272,18 @@ function Game(props) {
                     <h3>Leaderboard</h3>
                     {(displayLB === true) ?
                         <div id="scores">
-                            {leaderboard.map ((score) => {
-                            return(<div className='score' key={score.id}>
+                            {(leaderboard.length > 0) ?
+                                leaderboard.map ((score) => {
+                                    return(<div className='score' key={score.id}>
                                         <p>{score.name}</p>
                                         <p>{score.score.toDate().toTimeString().substring(0, 9)}</p>
                                     </div>)
-                            })}
+                            })
+                            :
+                            <div className='score'>
+                                <p>Loading</p>
+                                <p>...</p>
+                            </div>}
                         </div>
                     : ''}
                 </div>

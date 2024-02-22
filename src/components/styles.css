@@ -132,12 +132,17 @@ header {
     justify-content: space-around;
 }
 
+.score p {
+    width: 30%;
+}
+
 .score p:first-of-type {
     font-weight: bold;
 }
 
 .score p:last-of-type {
     font-style: italic;
+    text-align: center;
 }
 
 #player-score {
